@@ -43,7 +43,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class ImageLoadingClient
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -64,6 +69,19 @@ object AppModule {
         maxRequests = MAX_CONCURRENT_NETWORK_REQUESTS
         maxRequestsPerHost = MAX_CONCURRENT_NETWORK_REQUESTS
     }
+
+    @Provides
+    @Singleton
+    @ImageLoadingClient
+    fun provideImageLoadingClient(): OkHttpClient = OkHttpClient.Builder()
+        .dispatcher(
+            Dispatcher().apply {
+                maxRequests = MAX_CONCURRENT_NETWORK_REQUESTS
+                maxRequestsPerHost = MAX_CONCURRENT_NETWORK_REQUESTS
+            }
+        )
+        // Image requests intentionally have no whole-call timeout.
+        .build()
 
     @Provides
     @Singleton

@@ -41,4 +41,13 @@ class NetworkConfigurationTest {
         assertSame(dispatcher, client.dispatcher)
         assertEquals(15_000, client.callTimeoutMillis)
     }
+
+    @Test
+    fun `image client bounds requests without a whole call timeout`() {
+        val client = AppModule.provideImageLoadingClient()
+
+        assertEquals(5, client.dispatcher.maxRequests)
+        assertEquals(5, client.dispatcher.maxRequestsPerHost)
+        assertEquals(0, client.callTimeoutMillis)
+    }
 }

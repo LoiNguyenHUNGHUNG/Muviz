@@ -16,15 +16,28 @@
 package com.kanyideveloper.muviz
 
 import android.app.Application
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import com.kanyideveloper.muviz.common.di.ImageLoadingClient
 import dagger.hilt.android.HiltAndroidApp
+import okhttp3.OkHttpClient
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
-class MuvizApp : Application() {
+class MuvizApp : Application(), ImageLoaderFactory {
+    @Inject
+    @ImageLoadingClient
+    lateinit var imageLoadingClient: OkHttpClient
+
     override fun onCreate() {
         super.onCreate()
         initTimber()
     }
+
+    override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
+        .okHttpClient(imageLoadingClient)
+        .build()
 
     private fun initTimber() {
         Timber.plant(Timber.DebugTree())
