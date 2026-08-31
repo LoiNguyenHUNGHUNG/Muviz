@@ -49,10 +49,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    // Muviz uses separate TMDB API and image hosts. Preserve OkHttp's five-per-host
-    // behavior while making the combined application-wide bound explicit.
-    private const val MAX_CONCURRENT_NETWORK_REQUESTS = 10
-    private const val MAX_CONCURRENT_NETWORK_REQUESTS_PER_HOST = 5
+    // The timeout-configured Retrofit client only calls the TMDB API host.
+    private const val MAX_CONCURRENT_NETWORK_REQUESTS = 5
 
     @Singleton
     @Provides
@@ -64,7 +62,7 @@ object AppModule {
     @Singleton
     fun provideNetworkDispatcher(): Dispatcher = Dispatcher().apply {
         maxRequests = MAX_CONCURRENT_NETWORK_REQUESTS
-        maxRequestsPerHost = MAX_CONCURRENT_NETWORK_REQUESTS_PER_HOST
+        maxRequestsPerHost = MAX_CONCURRENT_NETWORK_REQUESTS
     }
 
     @Provides

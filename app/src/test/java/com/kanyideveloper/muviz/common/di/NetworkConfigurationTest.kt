@@ -26,7 +26,7 @@ class NetworkConfigurationTest {
     fun `dispatcher bounds concurrent network requests`() {
         val dispatcher = AppModule.provideNetworkDispatcher()
 
-        assertEquals(10, dispatcher.maxRequests)
+        assertEquals(5, dispatcher.maxRequests)
         assertEquals(5, dispatcher.maxRequestsPerHost)
     }
 
