@@ -37,6 +37,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -48,6 +49,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    // Muviz uses separate TMDB API and image hosts. Preserve OkHttp's five-per-host
+    // behavior while making the combined application-wide bound explicit.
+    private const val MAX_CONCURRENT_NETWORK_REQUESTS = 10
+    private const val MAX_CONCURRENT_NETWORK_REQUESTS_PER_HOST = 5
+
     @Singleton
     @Provides
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
@@ -56,8 +62,19 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(httpLoggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideNetworkDispatcher(): Dispatcher = Dispatcher().apply {
+        maxRequests = MAX_CONCURRENT_NETWORK_REQUESTS
+        maxRequestsPerHost = MAX_CONCURRENT_NETWORK_REQUESTS_PER_HOST
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        httpLoggingInterceptor: HttpLoggingInterceptor,
+        dispatcher: Dispatcher,
+    ): OkHttpClient {
         val okHttpClient = OkHttpClient.Builder()
+            .dispatcher(dispatcher)
             .addInterceptor(httpLoggingInterceptor)
             .callTimeout(15, TimeUnit.SECONDS)
             .connectTimeout(15, TimeUnit.SECONDS)

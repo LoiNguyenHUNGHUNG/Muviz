@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,141 +43,137 @@ class FilmDetailsViewModel @Inject constructor(
     private val _filmDetailsUiState = MutableStateFlow(FilmDetailsUiState())
     val filmDetailsUiState = _filmDetailsUiState.asStateFlow()
 
-    fun getMovieDetails(movieId: Int) {
-        viewModelScope.launch {
-            _filmDetailsUiState.update {
-                it.copy(
-                    isLoading = true
-                )
+    private suspend fun getMovieDetails(movieId: Int) {
+        _filmDetailsUiState.update {
+            it.copy(
+                isLoading = true
+            )
+        }
+        when (val result = repository.getMoviesDetails(movieId)) {
+            is Resource.Error -> {
+                _filmDetailsUiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = result.message
+                    )
+                }
             }
-            when (val result = repository.getMoviesDetails(movieId)) {
-                is Resource.Error -> {
-                    _filmDetailsUiState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = result.message
-                        )
-                    }
-                }
 
-                is Resource.Success -> {
-                    _filmDetailsUiState.update {
-                        it.copy(
-                            isLoading = false,
-                            movieDetails = result.data
-                        )
-                    }
+            is Resource.Success -> {
+                _filmDetailsUiState.update {
+                    it.copy(
+                        isLoading = false,
+                        movieDetails = result.data
+                    )
                 }
+            }
 
-                else -> {
-                    filmDetailsUiState
-                }
+            else -> {
+                filmDetailsUiState
             }
         }
     }
 
-    fun getTvSeriesDetails(tvId: Int) {
-        viewModelScope.launch {
-            _filmDetailsUiState.update {
-                it.copy(
-                    isLoading = true
-                )
+    private suspend fun getTvSeriesDetails(tvId: Int) {
+        _filmDetailsUiState.update {
+            it.copy(
+                isLoading = true
+            )
+        }
+        when (val result = repository.getTvSeriesDetails(tvId)) {
+            is Resource.Error -> {
+                _filmDetailsUiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = result.message
+                    )
+                }
             }
-            when (val result = repository.getTvSeriesDetails(tvId)) {
-                is Resource.Error -> {
-                    _filmDetailsUiState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = result.message
-                        )
-                    }
-                }
 
-                is Resource.Success -> {
-                    _filmDetailsUiState.update {
-                        it.copy(
-                            isLoading = false,
-                            tvSeriesDetails = result.data
-                        )
-                    }
+            is Resource.Success -> {
+                _filmDetailsUiState.update {
+                    it.copy(
+                        isLoading = false,
+                        tvSeriesDetails = result.data
+                    )
                 }
+            }
 
-                else -> {
-                    filmDetailsUiState
-                }
+            else -> {
+                filmDetailsUiState
             }
         }
     }
 
-    fun getMovieCasts(movieId: Int) {
-        viewModelScope.launch {
-            _filmDetailsUiState.update {
-                it.copy(isLoadingCasts = true)
+    private suspend fun getMovieCasts(movieId: Int) {
+        _filmDetailsUiState.update {
+            it.copy(isLoadingCasts = true)
+        }
+        when (val result = getMovieCastUseCase(movieId)) {
+            is Resource.Error -> {
+                _filmDetailsUiState.update {
+                    it.copy(
+                        isLoadingCasts = false,
+                        errorCasts = result.message
+                    )
+                }
             }
-            when (val result = getMovieCastUseCase(movieId)) {
-                is Resource.Error -> {
-                    _filmDetailsUiState.update {
-                        it.copy(
-                            isLoadingCasts = false,
-                            errorCasts = result.message
-                        )
-                    }
-                }
 
-                is Resource.Success -> {
-                    _filmDetailsUiState.update {
-                        it.copy(
-                            isLoadingCasts = false,
-                            credits = result.data
-                        )
-                    }
+            is Resource.Success -> {
+                _filmDetailsUiState.update {
+                    it.copy(
+                        isLoadingCasts = false,
+                        credits = result.data
+                    )
                 }
+            }
 
-                else -> {
-                    filmDetailsUiState
-                }
+            else -> {
+                filmDetailsUiState
             }
         }
     }
 
-    fun getTvSeriesCasts(tvId: Int) {
-        viewModelScope.launch {
-            _filmDetailsUiState.update {
-                it.copy(isLoadingCasts = true)
+    private suspend fun getTvSeriesCasts(tvId: Int) {
+        _filmDetailsUiState.update {
+            it.copy(isLoadingCasts = true)
+        }
+        when (val result = getTvCastUseCase(tvId)) {
+            is Resource.Error -> {
+                _filmDetailsUiState.update {
+                    it.copy(
+                        isLoadingCasts = false,
+                        errorCasts = result.message
+                    )
+                }
             }
-            when (val result = getTvCastUseCase(tvId)) {
-                is Resource.Error -> {
-                    _filmDetailsUiState.update {
-                        it.copy(
-                            isLoadingCasts = false,
-                            errorCasts = result.message
-                        )
-                    }
-                }
 
-                is Resource.Success -> {
-                    _filmDetailsUiState.update {
-                        it.copy(
-                            isLoadingCasts = false,
-                            credits = result.data
-                        )
-                    }
+            is Resource.Success -> {
+                _filmDetailsUiState.update {
+                    it.copy(
+                        isLoadingCasts = false,
+                        credits = result.data
+                    )
                 }
+            }
 
-                else -> {
-                    filmDetailsUiState
-                }
+            else -> {
+                filmDetailsUiState
             }
         }
     }
 
     fun getFilmDetails(filmId: Int, filmType: String) {
-        if (filmType == "movie") {
-            getMovieDetails(filmId)
-            getMovieCasts(filmId)
-        } else {
-            getTvSeriesDetails(filmId)
-            getTvSeriesCasts(filmId)
+        viewModelScope.launch {
+            coroutineScope {
+                if (filmType == "movie") {
+                    launch { getMovieDetails(filmId) }
+                    launch { getMovieCasts(filmId) }
+                } else {
+                    launch { getTvSeriesDetails(filmId) }
+                    launch { getTvSeriesCasts(filmId) }
+                }
+            }
         }
     }
 

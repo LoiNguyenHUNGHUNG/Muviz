@@ -16,15 +16,27 @@
 package com.kanyideveloper.muviz
 
 import android.app.Application
+import coil.ImageLoader
+import coil.ImageLoaderFactory
 import dagger.hilt.android.HiltAndroidApp
+import okhttp3.OkHttpClient
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
-class MuvizApp : Application() {
+class MuvizApp : Application(), ImageLoaderFactory {
+    @Inject
+    lateinit var okHttpClient: OkHttpClient
+
     override fun onCreate() {
         super.onCreate()
         initTimber()
     }
+
+    // API calls and images share one timeout and one global concurrency bound.
+    override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
+        .okHttpClient(okHttpClient)
+        .build()
 
     private fun initTimber() {
         Timber.plant(Timber.DebugTree())
