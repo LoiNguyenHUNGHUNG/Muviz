@@ -1,0 +1,53 @@
+/*
+ * Copyright 2024 Joel Kanyi.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.kanyideveloper.muviz.common.di
+
+import okhttp3.logging.HttpLoggingInterceptor
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
+import org.junit.Test
+
+class NetworkConfigurationTest {
+
+    @Test
+    fun `dispatcher bounds concurrent network requests`() {
+        val dispatcher = AppModule.provideNetworkDispatcher()
+
+        assertEquals(5, dispatcher.maxRequests)
+        assertEquals(5, dispatcher.maxRequestsPerHost)
+    }
+
+    @Test
+    fun `client uses bounded dispatcher and whole call timeout`() {
+        val dispatcher = AppModule.provideNetworkDispatcher()
+        val client = AppModule.provideOkHttpClient(
+            httpLoggingInterceptor = HttpLoggingInterceptor(),
+            dispatcher = dispatcher,
+        )
+
+        assertSame(dispatcher, client.dispatcher)
+        assertEquals(15_000, client.callTimeoutMillis)
+    }
+
+    @Test
+    fun `image client bounds requests without a whole call timeout`() {
+        val client = AppModule.provideImageLoadingClient()
+
+        assertEquals(5, client.dispatcher.maxRequests)
+        assertEquals(5, client.dispatcher.maxRequestsPerHost)
+        assertEquals(0, client.callTimeoutMillis)
+    }
+}

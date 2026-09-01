@@ -37,16 +37,25 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class ImageLoadingClient
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    // The timeout-configured Retrofit client only calls the TMDB API host.
+    private const val MAX_CONCURRENT_NETWORK_REQUESTS = 5
 
     @Singleton
     @Provides
@@ -56,8 +65,32 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(httpLoggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideNetworkDispatcher(): Dispatcher = Dispatcher().apply {
+        maxRequests = MAX_CONCURRENT_NETWORK_REQUESTS
+        maxRequestsPerHost = MAX_CONCURRENT_NETWORK_REQUESTS
+    }
+
+    @Provides
+    @Singleton
+    @ImageLoadingClient
+    fun provideImageLoadingClient(): OkHttpClient = OkHttpClient.Builder()
+        .dispatcher(
+            Dispatcher().apply {
+                maxRequests = MAX_CONCURRENT_NETWORK_REQUESTS
+                maxRequestsPerHost = MAX_CONCURRENT_NETWORK_REQUESTS
+            }
+        )
+        // Image requests intentionally have no whole-call timeout.
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        httpLoggingInterceptor: HttpLoggingInterceptor,
+        dispatcher: Dispatcher,
+    ): OkHttpClient {
         val okHttpClient = OkHttpClient.Builder()
+            .dispatcher(dispatcher)
             .addInterceptor(httpLoggingInterceptor)
             .callTimeout(15, TimeUnit.SECONDS)
             .connectTimeout(15, TimeUnit.SECONDS)
