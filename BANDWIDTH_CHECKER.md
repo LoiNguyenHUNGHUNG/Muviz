@@ -33,6 +33,10 @@ Use JDK 21 or newer and set `ANDROID_HOME` if the Android SDK is not already
 configured. The composite build loads the local checker and its annotation
 module; nothing needs to be published first.
 
+The checker is enabled only when `bandwidthCheckerPath` is supplied. Ordinary
+app builds use source-retained annotation stubs and do not run the analysis,
+which keeps Muviz CI independent of the private checker repository.
+
 The configured entry point is
 `FilmDetailsViewModel.getFilmDetails`. The checker follows calls from that
 function into the repositories and annotated Retrofit endpoints. With

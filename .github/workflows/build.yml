@@ -25,21 +25,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Checkout bandwidth checker
-        uses: actions/checkout@v5
-        with:
-          repository: LoiNguyenHUNGHUNG/bandwidth-timeout-checker
-          ref: codex/configure-analysis-entry-points
-          path: bandwidth-timeout-checker
-
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v3
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: '17'
+          distribution: 'adopt'
           cache: gradle
 
       - name: Make gradle executable
@@ -49,7 +42,4 @@ jobs:
         run: echo "${{secrets.LOCAL_PROPERTIES }}" > $GITHUB_WORKSPACE/local.properties
 
       - name: Build app
-        run: >-
-          ./gradlew assembleDebug --stacktrace
-          -PbandwidthCheckerPath=$GITHUB_WORKSPACE/bandwidth-timeout-checker
-          -PkotlinVersion=2.2.20
+        run: ./gradlew assembleDebug --stacktrace
