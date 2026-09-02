@@ -18,13 +18,15 @@ package com.kanyideveloper.muviz.cast.data.repository
 import com.kanyideveloper.muviz.cast.domain.model.Credits
 import com.kanyideveloper.muviz.cast.domain.repository.CastRepository
 import com.kanyideveloper.muviz.common.data.network.TMDBApi
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
 import com.kanyideveloper.muviz.common.util.Resource
 import com.kanyideveloper.muviz.filmdetail.data.mappers.toDomain
+import io.github.loinguyen.bandwidth.annotations.BoundedClient
 import timber.log.Timber
 import javax.inject.Inject
 
 class CastRepositoryImpl @Inject constructor(
-    private val api: TMDBApi,
+    @property:BoundedClient(k = MAX_CONCURRENT_TMDB_REQUESTS) private val api: TMDBApi,
 ) : CastRepository {
     // Series Casts
     override suspend fun getTvSeriesCasts(id: Int): Resource<Credits> {

@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+buildscript {
+    if (providers.gradleProperty("bandwidthCheckerPath").isPresent) {
+        dependencies {
+            classpath("io.github.loinguyen.bandwidth:gradle-plugin:0.1.0-SNAPSHOT")
+        }
+    }
+}
 
 plugins {
     alias(libs.plugins.android.application)
@@ -25,9 +35,25 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.compose.compiler)
 }
 
+val bandwidthCheckerEnabled = providers.gradleProperty("bandwidthCheckerPath").isPresent
+if (bandwidthCheckerEnabled) {
+    apply(plugin = "io.github.loinguyen.bandwidth")
+    val checker = extensions.getByName("bandwidthChecker")
+    @Suppress("UNCHECKED_CAST")
+    (checker.javaClass.getMethod("getReportEffects").invoke(checker) as Property<Boolean>).set(true)
+    @Suppress("UNCHECKED_CAST")
+    (checker.javaClass.getMethod("getEntryPoints").invoke(checker) as ListProperty<String>).add(
+        "com.kanyideveloper.muviz.filmdetail.presentation.FilmDetailsViewModel.getFilmDetails"
+    )
+}
+
 android {
     compileSdk = 36
     namespace = "com.kanyideveloper.muviz"
+
+    if (!bandwidthCheckerEnabled) {
+        sourceSets.getByName("main").java.srcDir("src/checkerStubs/kotlin")
+    }
 
     defaultConfig {
         applicationId = "com.kanyideveloper.muviz"

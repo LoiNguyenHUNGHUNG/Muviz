@@ -42,6 +42,7 @@ import coil.request.ImageRequest
 import com.kanyideveloper.muviz.R
 import com.kanyideveloper.muviz.cast.domain.model.Cast
 import com.kanyideveloper.muviz.cast.domain.model.Credits
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_IMAGE_REQUESTS
 import com.kanyideveloper.muviz.common.presentation.components.StandardToolbar
 import com.kanyideveloper.muviz.common.presentation.theme.MuvizTheme
 import com.kanyideveloper.muviz.common.util.Constants
@@ -49,6 +50,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.CastDetailsScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import io.github.loinguyen.bandwidth.annotations.BandwidthDownload
+import io.github.loinguyen.bandwidth.annotations.BandwidthEffect
 
 @Destination<RootGraph>
 @Composable
@@ -122,6 +125,16 @@ fun CastsScreenContent(
 }
 
 @Composable
+@BandwidthEffect(
+    downloads = [
+        BandwidthDownload(
+            rMaxBytesPerSecond = 0,
+            nMax = 1,
+            mayOutliveCall = true,
+            selfBound = MAX_CONCURRENT_IMAGE_REQUESTS,
+        ),
+    ],
+)
 fun CastItem(
     modifier: Modifier = Modifier,
     imageSize: Dp,

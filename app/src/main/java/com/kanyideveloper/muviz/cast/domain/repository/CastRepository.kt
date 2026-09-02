@@ -16,10 +16,43 @@
 package com.kanyideveloper.muviz.cast.domain.repository
 
 import com.kanyideveloper.muviz.cast.domain.model.Credits
+import com.kanyideveloper.muviz.common.data.network.ASSUMED_MAX_TMDB_RATE_BYTES_PER_SECOND
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
 import com.kanyideveloper.muviz.common.util.Resource
+import io.github.loinguyen.bandwidth.annotations.BandwidthDownload
+import io.github.loinguyen.bandwidth.annotations.BandwidthEffect
 
 interface CastRepository {
+    @BandwidthEffect(
+        downloads = [
+            BandwidthDownload(
+                rMaxBytesPerSecond = ASSUMED_MAX_TMDB_RATE_BYTES_PER_SECOND,
+                nMax = 1,
+                selfBound = MAX_CONCURRENT_TMDB_REQUESTS,
+            ),
+        ],
+    )
     suspend fun getTvSeriesCasts(id: Int): Resource<Credits>
+
+    @BandwidthEffect(
+        downloads = [
+            BandwidthDownload(
+                rMaxBytesPerSecond = ASSUMED_MAX_TMDB_RATE_BYTES_PER_SECOND,
+                nMax = 1,
+                selfBound = MAX_CONCURRENT_TMDB_REQUESTS,
+            ),
+        ],
+    )
     suspend fun getMovieCasts(id: Int): Resource<Credits>
+
+    @BandwidthEffect(
+        downloads = [
+            BandwidthDownload(
+                rMaxBytesPerSecond = ASSUMED_MAX_TMDB_RATE_BYTES_PER_SECOND,
+                nMax = 1,
+                selfBound = MAX_CONCURRENT_TMDB_REQUESTS,
+            ),
+        ],
+    )
     suspend fun getCastDetails(id: Int): Resource<Unit>
 }

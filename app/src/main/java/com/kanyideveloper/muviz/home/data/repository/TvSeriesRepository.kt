@@ -19,8 +19,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.kanyideveloper.muviz.common.data.network.TMDBApi
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
 import com.kanyideveloper.muviz.common.util.Constants.PAGING_SIZE
 import com.kanyideveloper.muviz.home.domain.model.Series
+import io.github.loinguyen.bandwidth.annotations.BoundedClient
 import com.kanyideveloper.muviz.home.data.paging.AiringTodayTvSeriesSource
 import com.kanyideveloper.muviz.home.data.paging.OnTheAirSeriesSource
 import com.kanyideveloper.muviz.home.data.paging.PopularSeriesSource
@@ -29,7 +31,9 @@ import com.kanyideveloper.muviz.home.data.paging.TrendingSeriesSource
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class TvSeriesRepository @Inject constructor(private val api: TMDBApi) {
+class TvSeriesRepository @Inject constructor(
+    @property:BoundedClient(k = MAX_CONCURRENT_TMDB_REQUESTS) private val api: TMDBApi,
+) {
     fun getTrendingThisWeekTvSeries(): Flow<PagingData<Series>> {
         return Pager(
             config = PagingConfig(enablePlaceholders = false, pageSize = PAGING_SIZE),

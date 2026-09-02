@@ -17,12 +17,16 @@ package com.kanyideveloper.muviz.home.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
 import com.kanyideveloper.muviz.common.data.network.TMDBApi
 import com.kanyideveloper.muviz.home.domain.model.Series
+import io.github.loinguyen.bandwidth.annotations.BoundedClient
 import retrofit2.HttpException
 import java.io.IOException
 
-class OnTheAirSeriesSource(private val api: TMDBApi) :
+class OnTheAirSeriesSource(
+    @property:BoundedClient(k = MAX_CONCURRENT_TMDB_REQUESTS) private val api: TMDBApi,
+) :
     PagingSource<Int, Series>() {
     override fun getRefreshKey(state: PagingState<Int, Series>): Int? {
         return state.anchorPosition

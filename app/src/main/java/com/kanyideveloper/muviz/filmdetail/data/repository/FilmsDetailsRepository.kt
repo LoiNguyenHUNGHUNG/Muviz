@@ -16,13 +16,17 @@
 package com.kanyideveloper.muviz.filmdetail.data.repository
 
 import com.kanyideveloper.muviz.common.data.network.TMDBApi
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
+import io.github.loinguyen.bandwidth.annotations.BoundedClient
 import com.kanyideveloper.muviz.home.data.network.dto.MovieDetails
 import com.kanyideveloper.muviz.home.data.network.dto.TvSeriesDetails
 import com.kanyideveloper.muviz.common.util.Resource
 import timber.log.Timber
 import javax.inject.Inject
 
-class FilmsDetailsRepository @Inject constructor(private val api: TMDBApi) {
+class FilmsDetailsRepository @Inject constructor(
+    @property:BoundedClient(k = MAX_CONCURRENT_TMDB_REQUESTS) private val api: TMDBApi,
+) {
 
     // Movie Details
     suspend fun getMoviesDetails(movieId: Int): Resource<MovieDetails> {

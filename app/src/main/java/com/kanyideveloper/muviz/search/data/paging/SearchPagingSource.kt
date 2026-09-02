@@ -17,12 +17,17 @@ package com.kanyideveloper.muviz.search.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
 import com.kanyideveloper.muviz.common.data.network.TMDBApi
 import com.kanyideveloper.muviz.search.domain.model.Search
+import io.github.loinguyen.bandwidth.annotations.BoundedClient
 import retrofit2.HttpException
 import java.io.IOException
 
-class SearchPagingSource(private val api: TMDBApi, private val query: String) :
+class SearchPagingSource(
+    @property:BoundedClient(k = MAX_CONCURRENT_TMDB_REQUESTS) private val api: TMDBApi,
+    private val query: String,
+) :
     PagingSource<Int, Search>() {
     override fun getRefreshKey(state: PagingState<Int, Search>): Int? {
         return state.anchorPosition
