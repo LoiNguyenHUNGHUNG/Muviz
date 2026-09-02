@@ -23,6 +23,14 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.parcelize)
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.jetbrains.kotlin.compose.compiler)
+    id("io.github.loinguyen.bandwidth")
+}
+
+bandwidthChecker {
+    reportEffects.set(true)
+    entryPoints.add(
+        "com.kanyideveloper.muviz.filmdetail.presentation.FilmDetailsViewModel.getFilmDetails"
+    )
 }
 
 android {

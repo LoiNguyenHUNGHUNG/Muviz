@@ -73,6 +73,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.kanyideveloper.muviz.R
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_IMAGE_REQUESTS
 import com.kanyideveloper.muviz.common.domain.model.Film
 import com.kanyideveloper.muviz.common.presentation.components.StandardToolbar
 import com.kanyideveloper.muviz.common.presentation.theme.MuvizTheme
@@ -84,6 +85,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.FilmDetailsScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import io.github.loinguyen.bandwidth.annotations.BandwidthDownload
+import io.github.loinguyen.bandwidth.annotations.BandwidthEffect
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -344,6 +347,16 @@ fun SearchBar(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
+@BandwidthEffect(
+    downloads = [
+        BandwidthDownload(
+            rMaxBytesPerSecond = 0,
+            nMax = 1,
+            mayOutliveCall = true,
+            selfBound = MAX_CONCURRENT_IMAGE_REQUESTS,
+        ),
+    ],
+)
 fun SearchItem(
     modifier: Modifier = Modifier,
     state: SearchUiState,

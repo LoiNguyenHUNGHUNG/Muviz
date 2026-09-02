@@ -20,13 +20,17 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.kanyideveloper.muviz.search.data.paging.SearchPagingSource
 import com.kanyideveloper.muviz.common.data.network.TMDBApi
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
 import com.kanyideveloper.muviz.common.util.Constants.PAGING_SIZE
 import com.kanyideveloper.muviz.search.domain.model.Search
 import com.kanyideveloper.muviz.search.domain.repository.SearchRepository
+import io.github.loinguyen.bandwidth.annotations.BoundedClient
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class SearchRepositoryImpl @Inject constructor(private val api: TMDBApi): SearchRepository {
+class SearchRepositoryImpl @Inject constructor(
+    @property:BoundedClient(k = MAX_CONCURRENT_TMDB_REQUESTS) private val api: TMDBApi,
+) : SearchRepository {
     override fun multiSearch(queryParam: String): Flow<PagingData<Search>> {
         return Pager(
             config = PagingConfig(enablePlaceholders = false, pageSize = PAGING_SIZE),

@@ -16,15 +16,17 @@
 package com.kanyideveloper.muviz.genre.data.repository
 
 import com.kanyideveloper.muviz.common.data.network.TMDBApi
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
 import com.kanyideveloper.muviz.common.util.Resource
 import com.kanyideveloper.muviz.genre.domain.model.Genre
 import com.kanyideveloper.muviz.genre.domain.repository.GenreRepository
+import io.github.loinguyen.bandwidth.annotations.BoundedClient
 import com.kanyideveloper.muviz.genre.data.mappers.toDomain
 import timber.log.Timber
 import javax.inject.Inject
 
 class GenreRepositoryImpl @Inject constructor(
-    private val api: TMDBApi,
+    @property:BoundedClient(k = MAX_CONCURRENT_TMDB_REQUESTS) private val api: TMDBApi,
 ) : GenreRepository {
     override suspend fun getMovieGenres(): Resource<List<Genre>> {
         val response = try {

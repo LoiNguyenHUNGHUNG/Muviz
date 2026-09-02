@@ -24,8 +24,21 @@ import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.kanyideveloper.muviz.R
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_IMAGE_REQUESTS
+import io.github.loinguyen.bandwidth.annotations.BandwidthDownload
+import io.github.loinguyen.bandwidth.annotations.BandwidthEffect
 
 @Composable
+@BandwidthEffect(
+    downloads = [
+        BandwidthDownload(
+            rMaxBytesPerSecond = 0,
+            nMax = 1,
+            mayOutliveCall = true,
+            selfBound = MAX_CONCURRENT_IMAGE_REQUESTS,
+        ),
+    ],
+)
 fun FilmImageBanner(
     modifier: Modifier = Modifier,
     filmImage: String,

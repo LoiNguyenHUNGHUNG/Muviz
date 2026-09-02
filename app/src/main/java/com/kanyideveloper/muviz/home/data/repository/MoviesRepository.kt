@@ -19,8 +19,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.kanyideveloper.muviz.common.data.network.TMDBApi
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
 import com.kanyideveloper.muviz.common.util.Constants.PAGING_SIZE
 import com.kanyideveloper.muviz.home.domain.model.Movie
+import io.github.loinguyen.bandwidth.annotations.BoundedClient
 import com.kanyideveloper.muviz.home.data.paging.NowPlayingMoviesSource
 import com.kanyideveloper.muviz.home.data.paging.PopularMoviesSource
 import com.kanyideveloper.muviz.home.data.paging.TopRatedMoviesSource
@@ -29,7 +31,9 @@ import com.kanyideveloper.muviz.home.data.paging.UpcomingMoviesSource
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class MoviesRepository @Inject constructor(private val api: TMDBApi) {
+class MoviesRepository @Inject constructor(
+    @property:BoundedClient(k = MAX_CONCURRENT_TMDB_REQUESTS) private val api: TMDBApi,
+) {
 
     fun getTrendingMoviesThisWeek(): Flow<PagingData<Movie>> {
         return Pager(

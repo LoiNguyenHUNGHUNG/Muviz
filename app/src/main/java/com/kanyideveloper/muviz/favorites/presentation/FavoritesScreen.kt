@@ -46,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest.Builder
 import com.kanyideveloper.muviz.R
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_IMAGE_REQUESTS
 import com.kanyideveloper.muviz.common.domain.model.Film
 import com.kanyideveloper.muviz.common.presentation.components.StandardToolbar
 import com.kanyideveloper.muviz.common.presentation.theme.MuvizTheme
@@ -57,6 +58,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.FilmDetailsScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import io.github.loinguyen.bandwidth.annotations.BandwidthDownload
+import io.github.loinguyen.bandwidth.annotations.BandwidthEffect
 import kotlinx.coroutines.delay
 
 @Destination<RootGraph>
@@ -224,6 +227,16 @@ private fun FavoritesScreenContent(
 }
 
 @Composable
+@BandwidthEffect(
+    downloads = [
+        BandwidthDownload(
+            rMaxBytesPerSecond = 0,
+            nMax = 1,
+            mayOutliveCall = true,
+            selfBound = MAX_CONCURRENT_IMAGE_REQUESTS,
+        ),
+    ],
+)
 fun FilmItem(
     filmItem: Favorite,
     onClick: () -> Unit,

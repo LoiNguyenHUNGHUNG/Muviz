@@ -23,6 +23,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.kanyideveloper.muviz.common.data.network.TMDBApi
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_IMAGE_REQUESTS
+import com.kanyideveloper.muviz.common.data.network.MAX_CONCURRENT_TMDB_REQUESTS
+import com.kanyideveloper.muviz.common.data.network.TMDB_CALL_TIMEOUT_MILLIS
 import com.kanyideveloper.muviz.common.data.repository.PreferenceRepositoryImpl
 import com.kanyideveloper.muviz.common.domain.repository.PreferenceRepository
 import com.kanyideveloper.muviz.common.util.Constants
@@ -53,10 +56,6 @@ annotation class ImageLoadingClient
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-    // The timeout-configured Retrofit client only calls the TMDB API host.
-    private const val MAX_CONCURRENT_NETWORK_REQUESTS = 5
-
     @Singleton
     @Provides
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
@@ -66,8 +65,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideNetworkDispatcher(): Dispatcher = Dispatcher().apply {
-        maxRequests = MAX_CONCURRENT_NETWORK_REQUESTS
-        maxRequestsPerHost = MAX_CONCURRENT_NETWORK_REQUESTS
+        maxRequests = MAX_CONCURRENT_TMDB_REQUESTS
+        maxRequestsPerHost = MAX_CONCURRENT_TMDB_REQUESTS
     }
 
     @Provides
@@ -76,8 +75,8 @@ object AppModule {
     fun provideImageLoadingClient(): OkHttpClient = OkHttpClient.Builder()
         .dispatcher(
             Dispatcher().apply {
-                maxRequests = MAX_CONCURRENT_NETWORK_REQUESTS
-                maxRequestsPerHost = MAX_CONCURRENT_NETWORK_REQUESTS
+                maxRequests = MAX_CONCURRENT_IMAGE_REQUESTS
+                maxRequestsPerHost = MAX_CONCURRENT_IMAGE_REQUESTS
             }
         )
         // Image requests intentionally have no whole-call timeout.
@@ -92,7 +91,7 @@ object AppModule {
         val okHttpClient = OkHttpClient.Builder()
             .dispatcher(dispatcher)
             .addInterceptor(httpLoggingInterceptor)
-            .callTimeout(15, TimeUnit.SECONDS)
+            .callTimeout(TMDB_CALL_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
             .connectTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
